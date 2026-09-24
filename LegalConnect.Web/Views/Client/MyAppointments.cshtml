@@ -1,0 +1,112 @@
+@model List<LegalConnect.Web.Models.Entities.Appointment>
+@{
+    ViewData["Title"] = "My Appointments (Client)";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-calendar-check text-primary me-2"></i>My Consultations</h3>
+        <p class="text-muted small mb-0">Track all your requested and past legal appointments.</p>
+    </div>
+    <div>
+        <a asp-action="FindLawyers" class="btn btn-warning btn-sm fw-bold">
+            <i class="bi bi-plus-lg me-1"></i> Book New Consultation
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom p-0 overflow-hidden shadow-sm">
+    @if (!Model.Any())
+    {
+        <div class="p-5 text-center text-muted">
+            <i class="bi bi-calendar-x fs-1 text-secondary mb-2"></i>
+            <h5>No appointment history found</h5>
+            <p class="small mb-3">You haven't booked any legal consultations yet.</p>
+            <a asp-action="FindLawyers" class="btn btn-primary btn-sm">Find a Lawyer</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th>Appointment #</th>
+                        <th>Lawyer</th>
+                        <th>Date & Time</th>
+                        <th>Matter Subject</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var appt in Model)
+                    {
+                        <tr>
+                            <td>#@appt.AppointmentId</td>
+                            <td>
+                                <div class="fw-bold">Adv. @appt.Lawyer.User.FullName</div>
+                                <small class="text-muted">@appt.Lawyer.Specialization?.Name</small>
+                            </td>
+                            <td>
+                                <div>@appt.AppointmentDate.ToString("yyyy-MM-dd")</div>
+                                <small class="text-muted">@appt.AppointmentTime.ToString(@"hh\:mm")</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">@appt.CaseTitle</div>
+                                <small class="text-muted text-truncate d-inline-block" style="max-width: 220px;">@appt.CaseDescription</small>
+                            </td>
+                            <td>
+                                <span class="badge @(appt.ConsultationMode == LegalConnect.Web.Models.Entities.ConsultationMode.Online ? "bg-info text-dark" : "bg-secondary")">
+                                    @appt.ConsultationMode
+                                </span>
+                            </td>
+                            <td>
+                                @if (appt.Status == LegalConnect.Web.Models.Entities.AppointmentStatus.Pending)
+                                {
+                                    <span class="badge bg-warning text-dark">Pending Review</span>
+                                }
+                                else if (appt.Status == LegalConnect.Web.Models.Entities.AppointmentStatus.Accepted)
+                                {
+                                    <span class="badge bg-primary">Confirmed / Upcoming</span>
+                                }
+                                else if (appt.Status == LegalConnect.Web.Models.Entities.AppointmentStatus.Completed)
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                else if (appt.Status == LegalConnect.Web.Models.Entities.AppointmentStatus.Rejected)
+                                {
+                                    <span class="badge bg-danger">Declined by Lawyer</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Cancelled</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-controller="Appointment" asp-action="Details" asp-route-id="@appt.AppointmentId" class="btn btn-outline-primary btn-sm" title="View Details">
+                                        Details
+                                    </a>
+                                    <a asp-controller="Message" asp-action="Thread" asp-route-appointmentId="@appt.AppointmentId" class="btn btn-outline-secondary btn-sm" title="Chat">
+                                        <i class="bi bi-chat-text"></i>
+                                    </a>
+
+                                    @if (appt.Status == LegalConnect.Web.Models.Entities.AppointmentStatus.Pending || appt.Status == LegalConnect.Web.Models.Entities.AppointmentStatus.Accepted)
+                                    {
+                                        <form asp-controller="Appointment" asp-action="Cancel" asp-route-id="@appt.AppointmentId" method="post" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Cancel Consultation">
+                                                <i class="bi bi-x-circle"></i> Cancel
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

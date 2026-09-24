@@ -1,0 +1,106 @@
+@model LegalConnect.Web.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center mt-3 mb-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="card card-custom shadow-sm p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus text-primary fs-1"></i>
+                <h3 class="fw-bold mt-2">Create an Account</h3>
+                <p class="text-muted small">Join LegalConnect to find legal counsel or offer consultations</p>
+            </div>
+
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small"></div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Choose Your Account Type</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="card p-3 text-center border-2 role-card @(Model.Role == "Client" ? "border-primary bg-primary bg-opacity-10" : "")" id="clientCard" style="cursor: pointer;" onclick="selectRole('Client')">
+                                <i class="bi bi-person-heart fs-3 text-primary"></i>
+                                <div class="fw-bold mt-1">Client</div>
+                                <div class="text-muted extra-small" style="font-size: 0.75rem;">Seeking legal advice</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card p-3 text-center border-2 role-card @(Model.Role == "Lawyer" ? "border-primary bg-primary bg-opacity-10" : "")" id="lawyerCard" style="cursor: pointer;" onclick="selectRole('Lawyer')">
+                                <i class="bi bi-briefcase-fill fs-3 text-warning"></i>
+                                <div class="fw-bold mt-1">Lawyer</div>
+                                <div class="text-muted extra-small" style="font-size: 0.75rem;">Providing consultations</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" asp-for="Role" id="RoleInput" />
+                    <span asp-validation-for="Role" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label fw-semibold"></label>
+                    <input asp-for="FullName" class="form-control" placeholder="e.g. John Doe or Adv. Jane Smith" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label fw-semibold"></label>
+                        <input asp-for="Phone" class="form-control" placeholder="+91 9876543210" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label fw-semibold"></label>
+                        <input asp-for="Password" class="form-control" placeholder="Min. 6 characters" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" placeholder="Re-type password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div id="lawyerNotice" class="alert alert-warning small py-2 @(Model.Role == "Lawyer" ? "" : "d-none")">
+                    <i class="bi bi-info-circle me-1"></i> As a lawyer, after registration you will complete your professional details and bar number for administrative verification.
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Complete Registration</button>
+            </form>
+
+            <div class="text-center mt-3 small">
+                Already registered? <a asp-action="Login" class="fw-semibold">Sign in here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function selectRole(role) {
+            document.getElementById('RoleInput').value = role;
+            var clientCard = document.getElementById('clientCard');
+            var lawyerCard = document.getElementById('lawyerCard');
+            var notice = document.getElementById('lawyerNotice');
+
+            if (role === 'Client') {
+                clientCard.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
+                lawyerCard.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
+                notice.classList.add('d-none');
+            } else {
+                lawyerCard.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
+                clientCard.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
+                notice.classList.remove('d-none');
+            }
+        }
+    </script>
+}

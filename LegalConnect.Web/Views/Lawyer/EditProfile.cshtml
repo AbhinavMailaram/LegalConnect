@@ -1,0 +1,139 @@
+@model LegalConnect.Web.Models.ViewModels.LawyerProfileEditViewModel
+@{
+    ViewData["Title"] = "Edit Lawyer Profile";
+}
+
+<div class="row justify-content-center mt-3 mb-5">
+    <div class="col-lg-10">
+        <div class="card card-custom shadow-sm p-4 p-md-5">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <div>
+                    <h3 class="fw-bold mb-1"><i class="bi bi-person-badge text-primary me-2"></i>Edit Professional Profile</h3>
+                    <p class="text-muted small mb-0">Provide accurate legal qualifications and Bar credentials for verification.</p>
+                </div>
+                <div>
+                    @if (Model.VerificationStatus == LegalConnect.Web.Models.Entities.VerificationStatus.Approved)
+                    {
+                        <span class="badge bg-success px-3 py-2"><i class="bi bi-patch-check-fill me-1"></i> Verified</span>
+                    }
+                    else if (Model.VerificationStatus == LegalConnect.Web.Models.Entities.VerificationStatus.Rejected)
+                    {
+                        <span class="badge bg-danger px-3 py-2"><i class="bi bi-x-circle me-1"></i> Not Approved</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-clock-history me-1"></i> Under Review</span>
+                    }
+                </div>
+            </div>
+
+            <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="LawyerId" />
+                <input type="hidden" asp-for="UserId" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small"></div>
+
+                <!-- Personal & Contact -->
+                <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-person me-1"></i> Contact Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label fw-semibold"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label fw-semibold"></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Professional Credentials -->
+                <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-briefcase me-1"></i> Professional Qualifications</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="RegistrationNumber" class="form-label fw-semibold"></label>
+                        <input asp-for="RegistrationNumber" class="form-control" placeholder="e.g. BAR/MH/2018/1234" />
+                        <span asp-validation-for="RegistrationNumber" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="SpecializationId" class="form-label fw-semibold"></label>
+                        <select asp-for="SpecializationId" asp-items="Model.SpecializationsList" class="form-select">
+                            <option value="">-- Select Legal Specialization --</option>
+                        </select>
+                        <span asp-validation-for="SpecializationId" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Qualification" class="form-label fw-semibold"></label>
+                        <input asp-for="Qualification" class="form-control" placeholder="e.g. B.A. LL.B (Hons), LL.M" />
+                        <span asp-validation-for="Qualification" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="ExperienceYears" class="form-label fw-semibold"></label>
+                        <input asp-for="ExperienceYears" type="number" min="0" max="60" class="form-control" />
+                        <span asp-validation-for="ExperienceYears" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="ConsultationFee" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input asp-for="ConsultationFee" type="number" step="50" min="0" class="form-control" />
+                        </div>
+                        <span asp-validation-for="ConsultationFee" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Office Location & Bio -->
+                <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-geo-alt me-1"></i> Location & Chambers</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label asp-for="Location" class="form-label fw-semibold"></label>
+                        <input asp-for="Location" class="form-control" placeholder="e.g. Mumbai, Delhi, Bengaluru" />
+                        <span asp-validation-for="Location" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-8">
+                        <label asp-for="Address" class="form-label fw-semibold"></label>
+                        <input asp-for="Address" class="form-control" placeholder="Chamber or office address" />
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Description" rows="4" class="form-control" placeholder="Describe your background, courts of practice, notable case areas, and consultation process..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Profile Photo -->
+                <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-camera me-1"></i> Profile Photo</h5>
+                <div class="row g-3 mb-4 align-items-center">
+                    <div class="col-auto">
+                        @if (!string.IsNullOrEmpty(Model.ExistingPhotoPath))
+                        {
+                            <img src="@Model.ExistingPhotoPath" alt="Profile" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center text-secondary" style="width: 80px; height: 80px;">
+                                <i class="bi bi-person-fill fs-2"></i>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ProfilePhotoFile" class="form-label fw-semibold"></label>
+                        <input asp-for="ProfilePhotoFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                        <small class="text-muted">JPG or PNG format, max 5MB.</small>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Dashboard" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">Save Profile Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

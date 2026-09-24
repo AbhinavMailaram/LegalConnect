@@ -1,0 +1,291 @@
+@model LegalConnect.Web.Models.ViewModels.LawyerDashboardViewModel
+@{
+    ViewData["Title"] = "Lawyer Dashboard";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Welcome, @Model.Lawyer.User.FullName</h2>
+        <p class="text-muted mb-0">Lawyer Consultation Management Portal</p>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-md-0">
+        <a asp-action="EditProfile" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-person-gear me-1"></i> Edit Profile
+        </a>
+        <a asp-action="Availability" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-clock-history me-1"></i> Manage Availability
+        </a>
+        <a asp-controller="Message" asp-action="Index" class="btn btn-outline-dark btn-sm position-relative">
+            <i class="bi bi-chat-dots me-1"></i> Messages
+            @if (Model.UnreadMessagesCount > 0)
+            {
+                <span class="badge bg-danger rounded-pill">@Model.UnreadMessagesCount</span>
+            }
+        </a>
+    </div>
+</div>
+
+<!-- Verification Status Banner -->
+@if (Model.Lawyer.VerificationStatus == LegalConnect.Web.Models.Entities.VerificationStatus.Pending)
+{
+    <div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+        <div>
+            <h5 class="alert-heading fw-bold mb-1">Account Verification Pending</h5>
+            <p class="mb-0 small">
+                Your profile has been submitted for review. An administrator will verify your Bar credentials.
+                Your profile will automatically appear in public searches once approved.
+            </p>
+        </div>
+    </div>
+}
+else if (Model.Lawyer.VerificationStatus == LegalConnect.Web.Models.Entities.VerificationStatus.Rejected)
+{
+    <div class="alert alert-danger d-flex align-items-center mb-4 shadow-sm" role="alert">
+        <i class="bi bi-x-circle-fill fs-3 me-3"></i>
+        <div>
+            <h5 class="alert-heading fw-bold mb-1">Account Verification Not Approved</h5>
+            <p class="mb-1 small">Reason: @(Model.Lawyer.RejectionReason ?? "Information incomplete or unverified.")</p>
+            <a asp-action="EditProfile" class="btn btn-danger btn-sm mt-1">Update Details & Re-submit for Review</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-success d-flex align-items-center mb-4 shadow-sm py-2">
+        <i class="bi bi-patch-check-fill text-success fs-4 me-2"></i>
+        <div class="small">
+            <strong>Verified Advocate:</strong> Your profile is verified and active in public search directories.
+            <a asp-action="Details" asp-route-id="@Model.Lawyer.LawyerId" target="_blank" class="fw-bold ms-2 text-decoration-none">View Public Profile <i class="bi bi-box-arrow-up-right small"></i></a>
+        </div>
+    </div>
+}
+
+<!-- Summary Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-custom p-3 border-start border-warning border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Pending Requests</div>
+                    <h3 class="fw-bold text-warning mb-0">@Model.PendingRequests.Count</h3>
+                </div>
+                <div class="rounded bg-warning bg-opacity-10 p-3 text-warning">
+                    <i class="bi bi-clock-history fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-custom p-3 border-start border-primary border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Upcoming / Accepted</div>
+                    <h3 class="fw-bold text-primary mb-0">@Model.UpcomingAppointments.Count</h3>
+                </div>
+                <div class="rounded bg-primary bg-opacity-10 p-3 text-primary">
+                    <i class="bi bi-calendar-event fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-custom p-3 border-start border-success border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Completed Consultations</div>
+                    <h3 class="fw-bold text-success mb-0">@Model.CompletedConsultations.Count</h3>
+                </div>
+                <div class="rounded bg-success bg-opacity-10 p-3 text-success">
+                    <i class="bi bi-check-circle fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-custom p-3 border-start border-secondary border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">Cancelled / Rejected</div>
+                    <h3 class="fw-bold text-secondary mb-0">@Model.CancelledAppointments.Count</h3>
+                </div>
+                <div class="rounded bg-secondary bg-opacity-10 p-3 text-secondary">
+                    <i class="bi bi-x-circle fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Requests Section -->
+<div class="card card-custom mb-4 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-inbox-fill text-warning me-2"></i>Incoming Consultation Requests
+        </h5>
+        <span class="badge bg-warning text-dark">@Model.PendingRequests.Count Pending</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.PendingRequests.Any())
+        {
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-inbox fs-2 text-secondary"></i>
+                <p class="mb-0 mt-2">No pending consultation requests at this time.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Client</th>
+                            <th>Date & Time</th>
+                            <th>Case Subject</th>
+                            <th>Mode</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appt in Model.PendingRequests)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@appt.Client.User.FullName</div>
+                                    <small class="text-muted">@appt.Client.User.Phone</small>
+                                </td>
+                                <td>
+                                    <div>@appt.AppointmentDate.ToString("yyyy-MM-dd")</div>
+                                    <small class="text-muted">@appt.AppointmentTime.ToString(@"hh\:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@appt.CaseTitle</div>
+                                    <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">@appt.CaseDescription</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(appt.ConsultationMode == LegalConnect.Web.Models.Entities.ConsultationMode.Online ? "bg-info text-dark" : "bg-secondary")">
+                                        @appt.ConsultationMode
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <form asp-controller="Appointment" asp-action="Accept" asp-route-id="@appt.AppointmentId" method="post">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="bi bi-check-lg"></i> Accept
+                                            </button>
+                                        </form>
+
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal-@appt.AppointmentId">
+                                            <i class="bi bi-x-lg"></i> Reject
+                                        </button>
+
+                                        <a asp-controller="Appointment" asp-action="Details" asp-route-id="@appt.AppointmentId" class="btn btn-outline-primary btn-sm">
+                                            Details
+                                        </a>
+                                    </div>
+
+                                    <!-- Reject Modal -->
+                                    <div class="modal fade" id="rejectModal-@appt.AppointmentId" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form asp-controller="Appointment" asp-action="Reject" asp-route-id="@appt.AppointmentId" method="post">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Reject Appointment Request</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="small text-muted">Please provide an optional reason for the client:</p>
+                                                        <input type="text" name="reason" class="form-control" placeholder="e.g. Schedule conflict, out of jurisdiction..." />
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger btn-sm">Confirm Rejection</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Upcoming & Confirmed Appointments -->
+<div class="card card-custom mb-4 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-calendar2-check-fill text-primary me-2"></i>Upcoming & Confirmed Appointments
+        </h5>
+        <span class="badge bg-primary">@Model.UpcomingAppointments.Count Scheduled</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.UpcomingAppointments.Any())
+        {
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-calendar2-x fs-2 text-secondary"></i>
+                <p class="mb-0 mt-2">No upcoming consultations scheduled.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Client Details</th>
+                            <th>Date & Time</th>
+                            <th>Matter</th>
+                            <th>Mode</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appt in Model.UpcomingAppointments)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@appt.Client.User.FullName</div>
+                                    <small class="text-muted"><i class="bi bi-telephone me-1"></i>@appt.Client.User.Phone</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @appt.AppointmentDate.ToString("yyyy-MM-dd") @@ @appt.AppointmentTime.ToString(@"hh\:mm")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@appt.CaseTitle</div>
+                                    <small class="text-muted">@appt.Documents.Count Document(s) attached</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(appt.ConsultationMode == LegalConnect.Web.Models.Entities.ConsultationMode.Online ? "bg-info text-dark" : "bg-secondary")">
+                                        @appt.ConsultationMode
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a asp-controller="Appointment" asp-action="Details" asp-route-id="@appt.AppointmentId" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye"></i> View Case
+                                        </a>
+                                        <a asp-controller="Message" asp-action="Thread" asp-route-appointmentId="@appt.AppointmentId" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-chat-text"></i> Messages
+                                        </a>
+                                        <form asp-controller="Appointment" asp-action="Complete" asp-route-id="@appt.AppointmentId" method="post">
+                                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                                <i class="bi bi-check2-circle"></i> Mark Completed
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

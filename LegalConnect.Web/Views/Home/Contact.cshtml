@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-md-8 col-lg-6">
+        <div class="card card-custom p-4 shadow-sm">
+            <h3 class="fw-bold mb-2">Get in Touch</h3>
+            <p class="text-muted small mb-4">Have questions regarding lawyer verification or platform features? Send us an inquiry.</p>
+
+            <form asp-action="Contact" method="post">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Your Name</label>
+                    <input type="text" name="name" class="form-control" required placeholder="Full Name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email Address</label>
+                    <input type="email" name="email" class="form-control" required placeholder="name@domain.com" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Subject</label>
+                    <input type="text" name="subject" class="form-control" required placeholder="Subject of inquiry" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Message</label>
+                    <textarea name="message" class="form-control" rows="4" required placeholder="Describe your question or feedback..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">Send Inquiry</button>
+            </form>
+        </div>
+    </div>
+</div>

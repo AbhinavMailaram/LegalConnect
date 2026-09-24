@@ -1,0 +1,105 @@
+@model LegalConnect.Web.Models.ViewModels.BookAppointmentViewModel
+@{
+    ViewData["Title"] = "Book Consultation with " + Model.LawyerName;
+}
+
+<div class="row justify-content-center mt-3 mb-5">
+    <div class="col-lg-9">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Client" asp-action="FindLawyers">Find Lawyers</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Lawyer" asp-action="Details" asp-route-id="@Model.LawyerId">@Model.LawyerName</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Request Appointment</li>
+            </ol>
+        </nav>
+
+        <div class="card card-custom p-4 p-md-5 shadow-sm">
+            <!-- Header Summary Card -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                <div>
+                    <span class="badge bg-warning text-dark mb-1">@Model.SpecializationName</span>
+                    <h3 class="fw-bold mb-1">Request Consultation: Adv. @Model.LawyerName</h3>
+                    <div class="text-muted small">
+                        <i class="bi bi-geo-alt me-1"></i>@Model.Location &bull; Consultation Fee: <strong class="text-success">₹@Model.ConsultationFee.ToString("N0")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lawyer's Declared Availability Reference -->
+            <div class="card bg-light border-0 p-3 mb-4">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-clock-history text-primary me-2"></i>Lawyer's Active Weekly Availability</h6>
+                @if (!Model.AvailableSlots.Any())
+                {
+                    <p class="text-muted small mb-0">Lawyer has not set specific slots yet. You may propose a standard business hours slot (e.g. 10:00 - 17:00).</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var slot in Model.AvailableSlots)
+                        {
+                            <span class="badge bg-white text-dark border p-2">
+                                <i class="bi bi-calendar-check text-success me-1"></i>
+                                <strong>@slot.DayOfWeek:</strong> @slot.StartTime.ToString(@"hh\:mm") – @slot.EndTime.ToString(@"hh\:mm")
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Booking Form -->
+            <form asp-action="Book" method="post">
+                <input type="hidden" asp-for="LawyerId" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small"></div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="AppointmentDate" class="form-label fw-semibold"></label>
+                        <input asp-for="AppointmentDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="AppointmentDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="AppointmentTimeString" class="form-label fw-semibold"></label>
+                        <input asp-for="AppointmentTimeString" type="time" class="form-control" />
+                        <span asp-validation-for="AppointmentTimeString" class="text-danger small"></span>
+                        <div class="form-text small">Select a time within the lawyer's available hours on the chosen day.</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConsultationMode" class="form-label fw-semibold"></label>
+                    <select asp-for="ConsultationMode" class="form-select">
+                        <option value="0">Online (Video / Audio consultation link)</option>
+                        <option value="1">In-Person (Lawyer's Chamber / Office)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CaseTitle" class="form-label fw-semibold"></label>
+                    <input asp-for="CaseTitle" class="form-control" placeholder="Brief subject (e.g. Property Title Dispute, Contract Review)" />
+                    <span asp-validation-for="CaseTitle" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="CaseDescription" class="form-label fw-semibold"></label>
+                    <textarea asp-for="CaseDescription" rows="5" class="form-control" placeholder="Provide background details about your issue, relevant dates, and the specific guidance you are seeking from counsel..."></textarea>
+                    <span asp-validation-for="CaseDescription" class="text-danger small"></span>
+                </div>
+
+                <div class="alert alert-info small py-2 mb-4">
+                    <i class="bi bi-info-circle me-1"></i> Once submitted, your request will be reviewed by the lawyer. You can attach supporting files (PDF, JPG) from your appointment details screen.
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-controller="Lawyer" asp-action="Details" asp-route-id="@Model.LawyerId" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-warning fw-bold text-dark px-4">Submit Appointment Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
